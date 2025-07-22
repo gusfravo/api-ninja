@@ -1,4 +1,4 @@
-import { FactoryProvider, Provider } from '@nestjs/common';
+import { FactoryProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 
