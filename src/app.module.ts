@@ -8,5 +8,6 @@ import { NinjaModule } from './modules/ninja.module';
   imports: [CoreModule, NinjaModule],
   controllers: [AppController],
   providers: [AppService],
+  exports: [CoreModule],
 })
-export class AppModule {}
+export class AppModule { }
