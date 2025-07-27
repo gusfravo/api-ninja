@@ -23,6 +23,18 @@
       ],
       "@core/*": [
         "src/core/*"
+      ],
+      "@benefit/*": [
+        "src/modules/benefit/*"
+      ],
+      "@delegation/*": [
+        "src/modules/delegation/*"
+      ],
+      "@dependence/*": [
+        "src/modules/dependence/*"
+      ],
+      "@member/*": [
+        "src/modules/member/*"
       ]
     }
   }

@@ -1,7 +1,9 @@
+import { Delegation } from '@delegation/entity/delegation.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -34,4 +36,7 @@ export class Member {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToOne(() => Delegation, (delegation) => delegation.titular)
+  delegation: Delegation;
 }
