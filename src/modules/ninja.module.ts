@@ -1,11 +1,9 @@
-import { Role } from '@auth/entities/role.entity';
+import { AuthModule } from '@auth/auth.module';
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { DependenceModule } from './dependence/dependence.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Role])
-  ],
+  imports: [AuthModule, DependenceModule],
   providers: [],
   exports: [],
 })

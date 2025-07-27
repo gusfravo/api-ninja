@@ -2,18 +2,19 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 
 @Entity()
-export class Role {
+export class Dependence {
   @PrimaryGeneratedColumn('uuid')
   uuid: string;
 
-  @Column()
+  @Column({ nullable: false })
+  code: string;
+
+  @Column({ nullable: false })
   name: string;
 
   @Column()
@@ -24,7 +25,4 @@ export class Role {
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  @OneToMany(() => User, (user) => user.role)
-  users: User[];
 }
