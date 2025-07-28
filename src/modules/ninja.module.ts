@@ -4,6 +4,7 @@ import { DependenceModule } from './dependence/dependence.module';
 import { BenefitModule } from './benefit/benefit.module';
 import { MemberModule } from './member/member.module';
 import { DelegationModule } from './delegation/delegation.module';
+import { EventModule } from './event/event.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { DelegationModule } from './delegation/delegation.module';
     BenefitModule,
     MemberModule,
     DelegationModule,
+    EventModule,
   ],
   providers: [],
   exports: [],

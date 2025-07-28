@@ -35,6 +35,9 @@
       ],
       "@member/*": [
         "src/modules/member/*"
+      ],
+      "@event/*": [
+        "src/modules/event/*"
       ]
     }
   }
