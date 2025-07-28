@@ -11,6 +11,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { EventFile } from './event-file.entity';
+import { EventMember } from './event-members.entity';
 
 @Entity()
 export class Event {
@@ -45,4 +46,7 @@ export class Event {
 
   @OneToMany(() => EventFile, (eventFile) => eventFile.event)
   files: EventFile[];
+
+  @OneToMany(() => EventMember, (eventMember) => eventMember.event)
+  members: EventMember[];
 }
