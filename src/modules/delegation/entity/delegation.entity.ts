@@ -1,4 +1,5 @@
 import { Dependence } from '@dependence/entity/dependence.entity';
+import { EventFile } from '@event/entity/event-file.entity';
 import { Member } from '@member/entity/member.entity';
 import {
   Column,
@@ -6,6 +7,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -13,7 +15,7 @@ import {
 
 @Entity()
 export class Delegation {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   uuid: string;
 
   @Column({ nullable: true, default: '' })
@@ -46,4 +48,7 @@ export class Delegation {
     referencedColumnName: 'uuid',
   })
   titular: Member;
+
+  @OneToMany(() => EventFile, (eventFile) => eventFile.deletation)
+  eventFiles: EventFile[];
 }

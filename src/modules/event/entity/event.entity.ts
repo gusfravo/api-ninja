@@ -6,13 +6,15 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { EventFile } from './event-file.entity';
 
 @Entity()
 export class Event {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   uuid: string;
 
   @Column()
@@ -40,4 +42,7 @@ export class Event {
     referencedColumnName: 'uuid',
   })
   benefit: Benefit;
+
+  @OneToMany(() => EventFile, (eventFile) => eventFile.event)
+  files: EventFile[];
 }
