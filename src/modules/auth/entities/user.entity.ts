@@ -33,6 +33,6 @@ export class User {
   updated_at: Date;
 
   @ManyToOne(() => Role, (role) => role.users)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'uuid' })
+  @JoinColumn({ name: 'role_id', referencedColumnName: 'uuid' })
   role: Role;
 }
