@@ -6,10 +6,13 @@ import { RoleService } from './services/roles/role.service';
 import { UserService } from './services/user/user.service';
 import { AuthService } from './services/auth/auth.service';
 import { AuthController } from './controllers/auth.controller';
+import { JwtService } from '@nestjs/jwt';
+import { LocalStrategy } from './strategies/local.strategy';
+import { CoreModule } from '@core/core.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Role, User])],
+  imports: [CoreModule, TypeOrmModule.forFeature([Role, User])],
   controllers: [AuthController],
-  providers: [RoleService, UserService, AuthService],
+  providers: [RoleService, UserService, AuthService, LocalStrategy],
 })
-export class AuthModule { }
+export class AuthModule {}

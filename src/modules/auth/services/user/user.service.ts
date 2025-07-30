@@ -11,7 +11,12 @@ export class UserService {
   ) {}
 
   onFindByUsername(username: string) {
-    return from(this.userRepository.findOne({ where: { username } }));
+    return from(
+      this.userRepository.findOne({
+        where: { username },
+        relations: { role: true },
+      }),
+    );
   }
 
   create(user: User) {

@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { dataBaseProvider } from './modules/providers/data-store.provider';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -9,7 +10,20 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync(dataBaseProvider),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        global: true,
+        signOptions: {
+          expiresIn: 3600,
+        },
+      }),
+      inject: [ConfigService],
+      global: true,
+    }),
   ],
-  exports: [ConfigModule],
+  providers: [JwtService],
+  exports: [ConfigModule, JwtModule],
 })
-export class CoreModule { }
+export class CoreModule {}

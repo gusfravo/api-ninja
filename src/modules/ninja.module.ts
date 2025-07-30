@@ -5,9 +5,11 @@ import { BenefitModule } from './benefit/benefit.module';
 import { MemberModule } from './member/member.module';
 import { DelegationModule } from './delegation/delegation.module';
 import { EventModule } from './event/event.module';
+import { CoreModule } from '@core/core.module';
 
 @Module({
   imports: [
+    CoreModule,
     AuthModule,
     DependenceModule,
     BenefitModule,
@@ -18,4 +20,4 @@ import { EventModule } from './event/event.module';
   providers: [],
   exports: [],
 })
-export class NinjaModule { }
+export class NinjaModule {}
