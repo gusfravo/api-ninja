@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from '@shared/decorators/public.decorator';
 import { Observable } from 'rxjs';
 
 @ApiTags('Auth')
@@ -28,6 +29,7 @@ export class AuthController {
   @ApiResponse({
     type: User,
   })
+  @Public()
   @Post('create')
   @UsePipes(new ValidationPipe())
   create(@Body() createUserDto: RegisterUser) {
@@ -41,6 +43,7 @@ export class AuthController {
     type: LoginToken,
   })
   @UseGuards(AuthGuard('local'))
+  @Public()
   @Post('login')
   @UsePipes(new ValidationPipe())
   login(@Request() req): Observable<LoginToken> {

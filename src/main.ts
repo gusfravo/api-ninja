@@ -16,6 +16,15 @@ const initSwagger = (app: INestApplication) => {
     .setDescription('The Ninja API description')
     .setVersion('1.0')
     .addTag('ninja')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+      },
+      'JWT',
+    )
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
