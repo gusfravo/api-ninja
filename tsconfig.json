@@ -38,6 +38,9 @@
       ],
       "@event/*": [
         "src/modules/event/*"
+      ],
+      "@shared/*": [
+        "src/shared/*"
       ]
     }
   }
