@@ -3,7 +3,7 @@ import { UpdateBenefit } from '@benefit/dto/update-benefit.dto';
 import { Benefit } from '@benefit/entity/benefit.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { from, switchMap, throwError } from 'rxjs';
+import { from, Observable, of, switchMap, throwError } from 'rxjs';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -40,6 +40,34 @@ export class BenefitService {
         saveBenefit.name = updateBenefit.name;
         saveBenefit.status = updateBenefit.status;
         return from(this.benefitRepository.save(saveBenefit));
+      }),
+    );
+  }
+
+  onList(): Observable<Benefit[]> {
+    return from(this.benefitRepository.find({ where: { status: true } }));
+  }
+
+  onGet(benefitId: string) {
+    return from(
+      this.benefitRepository.findOne({ where: { uuid: benefitId } }),
+    ).pipe(
+      switchMap((benefit) => {
+        if (!benefit)
+          return throwError(
+            () => new NotFoundException('No podimos enocontrar la persión'),
+          );
+
+        return of(benefit);
+      }),
+    );
+  }
+
+  onDelete(benefitId: string) {
+    return this.onGet(benefitId).pipe(
+      switchMap((updateBenefit) => {
+        updateBenefit.status = false;
+        return this.benefitRepository.save(updateBenefit);
       }),
     );
   }
