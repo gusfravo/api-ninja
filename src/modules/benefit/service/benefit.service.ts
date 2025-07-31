@@ -1,6 +1,7 @@
 import { CreateBenefit } from '@benefit/dto/create-benefit.dto';
 import { UpdateBenefit } from '@benefit/dto/update-benefit.dto';
 import { Benefit } from '@benefit/entity/benefit.entity';
+import { benefitInstance } from '@benefit/operator/benefit-instance.operator';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { from, Observable, of, switchMap, throwError } from 'rxjs';
@@ -21,7 +22,9 @@ export class BenefitService {
   }
 
   private create(createBenefit: CreateBenefit) {
-    return from(this.benefitRepository.save(createBenefit));
+    return from(this.benefitRepository.save(createBenefit)).pipe(
+      benefitInstance(),
+    );
   }
 
   private update(updateBenefit: UpdateBenefit) {
@@ -41,6 +44,7 @@ export class BenefitService {
         saveBenefit.status = updateBenefit.status;
         return from(this.benefitRepository.save(saveBenefit));
       }),
+      benefitInstance(),
     );
   }
 
@@ -49,6 +53,10 @@ export class BenefitService {
   }
 
   onGet(benefitId: string) {
+    return this.get(benefitId).pipe(benefitInstance());
+  }
+
+  private get(benefitId: string) {
     return from(
       this.benefitRepository.findOne({ where: { uuid: benefitId } }),
     ).pipe(
@@ -64,11 +72,12 @@ export class BenefitService {
   }
 
   onDelete(benefitId: string) {
-    return this.onGet(benefitId).pipe(
+    return this.get(benefitId).pipe(
       switchMap((updateBenefit) => {
         updateBenefit.status = false;
         return this.benefitRepository.save(updateBenefit);
       }),
+      benefitInstance(),
     );
   }
 }
