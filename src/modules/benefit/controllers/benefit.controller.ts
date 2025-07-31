@@ -4,7 +4,9 @@ import { BenefitService } from '@benefit/service/benefit.service';
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   UsePipes,
   ValidationPipe,
@@ -13,6 +15,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -45,5 +48,39 @@ export class BenefitController {
   @UsePipes(new ValidationPipe())
   update(@Body() object: UpdateBenefit) {
     return this.benefitService.onUpdate(object);
+  }
+
+  @ApiOperation({ summary: 'Metodo para eliminar logicamente una prestación' })
+  @ApiBearerAuth('JWT')
+  @ApiParam({
+    name: 'uuid',
+    description: 'Benfit ID',
+    type: String,
+    format: 'uuid',
+  })
+  @ApiResponse({
+    type: BenefitResponse,
+  })
+  @Delete('delete/:uuid')
+  @UsePipes(new ValidationPipe())
+  delete(@Param('uuid') uuid: string) {
+    return this.benefitService.onDelete(uuid);
+  }
+
+  @ApiOperation({ summary: 'Metodo para obtener una prestación' })
+  @ApiBearerAuth('JWT')
+  @ApiParam({
+    name: 'uuid',
+    description: 'Benfit ID',
+    type: String,
+    format: 'uuid',
+  })
+  @ApiResponse({
+    type: BenefitResponse,
+  })
+  @Get('get/:uuid')
+  @UsePipes(new ValidationPipe())
+  get(@Param('uuid') uuid: string) {
+    return this.benefitService.onGet(uuid);
   }
 }
