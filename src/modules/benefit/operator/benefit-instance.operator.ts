@@ -12,7 +12,11 @@ export const benefitInstance = (): UnaryFunction<
 > => {
   return pipe(
     switchMap((benefit: Benefit) => {
-      return of(plainToInstance(BenefitResponse, benefit));
+      return of(
+        plainToInstance(BenefitResponse, benefit, {
+          excludeExtraneousValues: true,
+        }),
+      );
     }),
   );
 };
