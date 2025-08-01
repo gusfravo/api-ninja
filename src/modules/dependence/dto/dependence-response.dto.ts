@@ -1,10 +1,14 @@
 import { Expose } from 'class-transformer';
 import { IsBoolean, IsString } from 'class-validator';
 
-export class BenefitResponse {
+export class DependenceResponse {
   @Expose()
   @IsString()
   uuid: string;
+
+  @Expose()
+  @IsString()
+  code: string;
 
   @Expose()
   @IsString()
