@@ -7,7 +7,7 @@ import { MemberService } from '@member/service/member.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { forkJoin, from, Observable, of, switchMap, throwError } from 'rxjs';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere, Like, Repository } from 'typeorm';
 
 @Injectable()
 export class DelegationService {
@@ -31,6 +31,8 @@ export class DelegationService {
 
     if (filterOptions.dependenceId)
       filterQuery.dependence = { uuid: filterOptions.dependenceId };
+
+    if (filterOptions.name) filterQuery.name = Like(`%${filterOptions.name}%`);
 
     return from(this.delegationRepositoty.find({ where: filterQuery }));
   }
