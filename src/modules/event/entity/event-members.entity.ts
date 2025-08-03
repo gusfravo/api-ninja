@@ -41,7 +41,7 @@ export class EventMember {
   })
   event: Event;
 
-  @OneToOne(() => Member, (member) => member.eventMember)
+  @ManyToOne(() => Member, (member) => member.eventMembers)
   @JoinColumn({
     name: 'member_id',
     referencedColumnName: 'uuid',

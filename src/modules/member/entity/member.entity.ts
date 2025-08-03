@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -41,6 +42,6 @@ export class Member {
   @OneToOne(() => Delegation, (delegation) => delegation.titular)
   delegation: Delegation;
 
-  @OneToOne(() => EventMember, (eventMember) => eventMember.member)
-  eventMember: EventMember;
+  @OneToMany(() => EventMember, (eventMember) => eventMember.member)
+  eventMembers: EventMember[];
 }

@@ -8,5 +8,6 @@ import { DependenceController } from './controllers/dependence.controller';
   imports: [TypeOrmModule.forFeature([Dependence])],
   controllers: [DependenceController],
   providers: [DependenceService],
+  exports: [DependenceService],
 })
 export class DependenceModule {}

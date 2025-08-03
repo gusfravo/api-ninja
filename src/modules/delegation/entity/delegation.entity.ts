@@ -47,7 +47,7 @@ export class Delegation {
     name: 'titular_id',
     referencedColumnName: 'uuid',
   })
-  titular: Member;
+  titular: Member | null;
 
   @OneToMany(() => EventFile, (eventFile) => eventFile.deletation)
   eventFiles: EventFile[];

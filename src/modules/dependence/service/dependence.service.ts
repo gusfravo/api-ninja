@@ -56,7 +56,7 @@ export class DependenceService {
     );
   }
 
-  private get(dependenceId: string) {
+  get(dependenceId: string) {
     return from(
       this.dependenceRepository.findOne({ where: { uuid: dependenceId } }),
     ).pipe(
