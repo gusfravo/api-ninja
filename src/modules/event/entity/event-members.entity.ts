@@ -4,12 +4,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Event } from './event.entity';
 import { Member } from '@member/entity/member.entity';
+import { Dependence } from '@dependence/entity/dependence.entity';
+import { EventFile } from './event-file.entity';
 
 @Entity()
 export class EventMember {
@@ -47,4 +48,18 @@ export class EventMember {
     referencedColumnName: 'uuid',
   })
   member: Member;
+
+  @ManyToOne(() => Dependence)
+  @JoinColumn({
+    name: 'dependence_id',
+    referencedColumnName: 'uuid',
+  })
+  dependence: Dependence;
+
+  @ManyToOne(() => EventFile, (eventFile) => eventFile.eventMembers)
+  @JoinColumn({
+    name: 'event_file_id',
+    referencedColumnName: 'uuid',
+  })
+  eventFile: EventFile;
 }

@@ -4,11 +4,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Event } from './event.entity';
 import { Delegation } from '@delegation/entity/delegation.entity';
+import { EventMember } from './event-members.entity';
 
 @Entity()
 export class EventFile {
@@ -43,4 +45,7 @@ export class EventFile {
     referencedColumnName: 'uuid',
   })
   deletation: Delegation;
+
+  @OneToMany(() => EventMember, (eventMember) => eventMember.eventFile)
+  eventMembers: EventMember[];
 }
