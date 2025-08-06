@@ -4,6 +4,7 @@ import { Delegation } from './entity/delegation.entity';
 import { DependenceModule } from '@dependence/dependence.module';
 import { MemberModule } from '@member/member.module';
 import { DelegationService } from './service/delegation.service';
+import { DelegationController } from './controller/delgation.controller';
 
 @Module({
   imports: [
@@ -12,5 +13,6 @@ import { DelegationService } from './service/delegation.service';
     MemberModule,
   ],
   providers: [DelegationService],
+  controllers: [DelegationController],
 })
-export class DelegationModule {}
+export class DelegationModule { }
