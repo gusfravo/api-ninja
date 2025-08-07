@@ -33,6 +33,9 @@ export class Member {
   @Column({ default: true })
   status: boolean;
 
+  @Column({ default: false }) //indica si la persona pertene al sidicato
+  is_real_member: boolean;
+
   @CreateDateColumn()
   created_at: Date;
 

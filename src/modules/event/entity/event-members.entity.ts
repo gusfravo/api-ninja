@@ -4,6 +4,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -11,6 +12,7 @@ import { Event } from './event.entity';
 import { Member } from '@member/entity/member.entity';
 import { Dependence } from '@dependence/entity/dependence.entity';
 import { EventFile } from './event-file.entity';
+import { EventMemberAdditionalState } from './event-member-additional.entity';
 
 @Entity()
 export class EventMember {
@@ -62,4 +64,10 @@ export class EventMember {
     referencedColumnName: 'uuid',
   })
   eventFile: EventFile;
+
+  @OneToMany(
+    () => EventMemberAdditionalState,
+    (eventMemberAdditionalState) => eventMemberAdditionalState.eventMember,
+  )
+  additionalStates: EventMemberAdditionalState[];
 }

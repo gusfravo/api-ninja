@@ -17,15 +17,6 @@ export class EventFile {
   @PrimaryGeneratedColumn('uuid')
   uuid: string;
 
-  @Column()
-  resource_file_type: string;
-
-  @Column({
-    type: 'longblob',
-    nullable: true,
-  })
-  resource_file: string;
-
   @CreateDateColumn()
   created_at: Date;
 
