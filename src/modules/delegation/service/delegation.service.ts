@@ -99,7 +99,10 @@ export class DelegationService {
 
   private get(delegationId: string) {
     return from(
-      this.delegationRepositoty.findOne({ where: { uuid: delegationId } }),
+      this.delegationRepositoty.findOne({
+        where: { uuid: delegationId },
+        relations: { titular: true, dependence: true },
+      }),
     ).pipe(
       switchMap((delegation) => {
         if (!delegation)
