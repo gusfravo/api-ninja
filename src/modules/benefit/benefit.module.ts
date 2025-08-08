@@ -8,5 +8,6 @@ import { BenefitController } from './controllers/benefit.controller';
   imports: [TypeOrmModule.forFeature([Benefit])],
   controllers: [BenefitController],
   providers: [BenefitService],
+  exports: [BenefitService],
 })
 export class BenefitModule {}

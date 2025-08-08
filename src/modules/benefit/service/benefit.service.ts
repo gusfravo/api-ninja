@@ -56,7 +56,7 @@ export class BenefitService {
     return this.get(benefitId).pipe(benefitInstance());
   }
 
-  private get(benefitId: string) {
+  get(benefitId: string) {
     return from(
       this.benefitRepository.findOne({ where: { uuid: benefitId } }),
     ).pipe(

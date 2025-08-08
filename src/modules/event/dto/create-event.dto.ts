@@ -14,7 +14,7 @@ export class CreateEvent {
   @ApiProperty({ description: 'FEcha de fin del evento' })
   @IsDate()
   @IsOptional()
-  endDate: Date | undefined;
+  endDate: Date | null;
 
   @ApiProperty({
     description: 'identificador de la prestacion a asociiar con el evento',
