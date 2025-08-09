@@ -12,7 +12,7 @@ export class EventService {
   constructor(
     @InjectRepository(Event) private eventRepository: Repository<Event>,
     private benefitService: BenefitService,
-  ) {}
+  ) { }
 
   onUpdate(updateEvent: UpdateEvent) {
     const { uuid, ...createEvent } = updateEvent;
@@ -56,6 +56,10 @@ export class EventService {
         );
       }),
     );
+  }
+
+  onGet(eventId: string) {
+    return this.get(eventId);
   }
 
   private get(eventId: string): Observable<Event> {

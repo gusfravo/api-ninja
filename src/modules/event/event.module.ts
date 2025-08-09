@@ -5,6 +5,7 @@ import { EventFile } from './entity/event-file.entity';
 import { EventMember } from './entity/event-members.entity';
 import { EventMemberAdditionalState } from './entity/event-member-additional.entity';
 import { BenefitModule } from '@benefit/benefit.module';
+import { EventExcel } from './entity/event-excel.entity';
 
 @Module({
   imports: [
@@ -13,8 +14,9 @@ import { BenefitModule } from '@benefit/benefit.module';
       EventFile,
       EventMember,
       EventMemberAdditionalState,
+      EventExcel,
     ]),
     BenefitModule,
   ],
 })
-export class EventModule {}
+export class EventModule { }
