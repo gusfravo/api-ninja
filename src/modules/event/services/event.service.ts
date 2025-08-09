@@ -32,6 +32,7 @@ export class EventService {
           start_date: createEvent.startDate,
           end_date: createEvent.endDate,
           benefit,
+          status: createEvent.status,
         };
 
         return from(this.eventRepository.save(saveEvent));
@@ -51,7 +52,7 @@ export class EventService {
         return benefit$.pipe(
           switchMap((benefit) => {
             event.benefit = benefit;
-            return from(this.eventRepository.save(updateEvent));
+            return from(this.eventRepository.save(event));
           }),
         );
       }),
