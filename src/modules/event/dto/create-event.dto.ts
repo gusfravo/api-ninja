@@ -1,7 +1,7 @@
 import { EventStatus } from '@event/enums/event-status.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateEvent {
   @ApiProperty({ description: 'Estatus used for that event' })

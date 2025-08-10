@@ -15,7 +15,7 @@ export class EventExcel {
   uuid: string;
 
   @Column({ type: 'longblob', nullable: true })
-  excel: string;
+  excel: Buffer;
 
   @Column({ nullable: true })
   type: string;

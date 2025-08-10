@@ -8,6 +8,7 @@ import { BenefitModule } from '@benefit/benefit.module';
 import { EventExcel } from './entity/event-excel.entity';
 import { EventController } from './controllers';
 import { EventService } from './services/event.service';
+import { EventExcelService } from './services';
 
 @Module({
   imports: [
@@ -21,6 +22,6 @@ import { EventService } from './services/event.service';
     BenefitModule,
   ],
   controllers: [EventController],
-  providers: [EventService],
+  providers: [EventService, EventExcelService],
 })
 export class EventModule { }
