@@ -97,6 +97,6 @@ export class EventController {
   @UsePipes(new ValidationPipe())
   @Post('execute')
   executeEvent(@Body() data: ExecuteEventExcel) {
-    return this.eventExcelService.readExcelFromEvent(data.eventId);
+    return this.eventExcelService.processExcel(data.eventId);
   }
 }

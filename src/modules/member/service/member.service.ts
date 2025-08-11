@@ -10,7 +10,13 @@ import { Like, Repository } from 'typeorm';
 export class MemberService {
   constructor(
     @InjectRepository(Member) private memberRepository: Repository<Member>,
-  ) {}
+  ) { }
+
+  onBulkInsert(listMembers: Member[]) {
+    return this.memberRepository.save(listMembers, {
+      chunk: listMembers.length,
+    });
+  }
 
   onUpdate(updateMember: UpdateMember) {
     const { uuid, ...createMember } = updateMember;
