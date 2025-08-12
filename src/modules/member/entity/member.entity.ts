@@ -25,7 +25,13 @@ export class Member {
   birth_date: Date;
 
   @Column({ nullable: true })
+  department: string;
+
+  @Column({ nullable: true })
   nom: string;
+
+  @Column({ nullable: true })
+  secretary: string;
 
   @Column()
   contribution: boolean;

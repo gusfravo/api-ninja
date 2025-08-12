@@ -14,9 +14,17 @@ export class CreateMember {
   @IsDate()
   birthDate: Date;
 
+  @ApiProperty({ description: 'Dep viene en el excel' })
+  @IsString()
+  department: string;
+
   @ApiProperty({ description: 'Nom viene en el excel' })
   @IsString()
   nom: string;
+
+  @ApiProperty({ description: 'secretary viene en el excel' })
+  @IsString()
+  secretary: string;
 
   @ApiProperty({
     description:
