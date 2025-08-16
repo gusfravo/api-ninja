@@ -10,6 +10,7 @@ import { EventController } from './controllers';
 import { EventService } from './services/event.service';
 import { EventExcelService } from './services';
 import { MemberModule } from '@member/member.module';
+import { EventExcelHistory } from './entity/event-excel-history.entity';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { MemberModule } from '@member/member.module';
       EventMember,
       EventMemberAdditionalState,
       EventExcel,
+      EventExcelHistory,
     ]),
     BenefitModule,
     MemberModule,
@@ -26,4 +28,4 @@ import { MemberModule } from '@member/member.module';
   controllers: [EventController],
   providers: [EventService, EventExcelService],
 })
-export class EventModule { }
+export class EventModule {}
