@@ -6,6 +6,7 @@ import { Member } from '@member/entity/member.entity';
 import { MemberService } from '@member/service/member.service';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { getSheetNameFromExcelBuffet } from '@shared/utils';
 import { plainToInstance } from 'class-transformer';
 import { from, map, of, switchMap, tap, throwError } from 'rxjs';
 import { DataSource, Repository } from 'typeorm';
@@ -47,6 +48,22 @@ export class EventExcelService {
         });
       }),
     );
+  }
+
+  async onGetSheetsFromExcel(eventId: string) {
+    try {
+      const excelDB = await this.eventExcelRepository.findOne({
+        where: { event: { uuid: eventId } },
+      });
+
+      if (!excelDB)
+        throw new InternalServerErrorException('Recuerso no encontrado');
+
+      const sheets = getSheetNameFromExcelBuffet(excelDB.excel);
+      return sheets;
+    } catch (e) {
+      throw new Error('Failed to import or process data', e);
+    }
   }
 
   readExcelFromEvent(eventId: string) {
