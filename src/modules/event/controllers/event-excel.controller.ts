@@ -1,4 +1,5 @@
 import { ExecuteEventExcel } from '@event/dto/execute-event-excel.dto';
+import { ProccessEventExcel } from '@event/dto/proccess-event-excel.dto';
 import { EventExcelService } from '@event/services';
 import {
   Body,
@@ -23,5 +24,16 @@ export class EventExcelController {
   @UsePipes(new ValidationPipe())
   getSheets(@Body() object: ExecuteEventExcel) {
     return this.eventExcelService.onGetSheetsFromExcel(object.eventId);
+  }
+
+  @ApiOperation({ summary: 'Metodo para crear un nuevo evento de tomar datos' })
+  @ApiBearerAuth('JWT')
+  @ApiBody({
+    type: ProccessEventExcel,
+  })
+  @UsePipes(new ValidationPipe())
+  @Post('execute')
+  executeEvent(@Body() data: ProccessEventExcel) {
+    return this.eventExcelService.onProcessExcel(data.eventId, data.sheetName);
   }
 }

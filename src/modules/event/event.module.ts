@@ -8,7 +8,7 @@ import { BenefitModule } from '@benefit/benefit.module';
 import { EventExcel } from './entity/event-excel.entity';
 import { EventController } from './controllers';
 import { EventService } from './services/event.service';
-import { EventExcelService } from './services';
+import { EventExcelHistoryService, EventExcelService } from './services';
 import { MemberModule } from '@member/member.module';
 import { EventExcelHistory } from './entity/event-excel-history.entity';
 import { EventExcelController } from './controllers/event-excel.controller';
@@ -27,6 +27,6 @@ import { EventExcelController } from './controllers/event-excel.controller';
     MemberModule,
   ],
   controllers: [EventController, EventExcelController],
-  providers: [EventService, EventExcelService],
+  providers: [EventService, EventExcelService, EventExcelHistoryService],
 })
 export class EventModule {}

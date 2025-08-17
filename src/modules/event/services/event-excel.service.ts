@@ -1,16 +1,23 @@
 import { ResponseUploadEventFile } from '@event/dto/ResponseUploadFileEvent.dto';
+import { EventExcelHistory } from '@event/entity/event-excel-history.entity';
 import { EventExcel } from '@event/entity/event-excel.entity';
+import { TemporyResult } from '@event/interfaces/temporyResult.interface';
 import { getDateFromRFC } from '@event/utils/date.utils';
 import { CreateMember } from '@member/dto/create-member.dto';
 import { Member } from '@member/entity/member.entity';
 import { MemberService } from '@member/service/member.service';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { getSheetNameFromExcelBuffet } from '@shared/utils';
+import { CuotaSindical } from '@shared/enums/cuota-sindical.enum';
+import {
+  getDataFromExcelBuffer,
+  getSheetNameFromExcelBuffet,
+} from '@shared/utils';
 import { plainToInstance } from 'class-transformer';
 import { from, map, of, switchMap, tap, throwError } from 'rxjs';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, QueryRunner, Repository } from 'typeorm';
 import * as xlsx from 'xlsx'; // Importamos la librería xlsx
+import { EventExcelHistoryService } from './event-excel-history.service';
 
 @Injectable()
 export class EventExcelService {
@@ -19,6 +26,7 @@ export class EventExcelService {
     private eventExcelRepository: Repository<EventExcel>,
     @InjectDataSource() private readonly dbSource: DataSource,
     private readonly memberService: MemberService,
+    private readonly eventExcelHistoryService: EventExcelHistoryService,
   ) {}
 
   findByEvent(eventId: string) {
@@ -61,6 +69,45 @@ export class EventExcelService {
 
       const sheets = getSheetNameFromExcelBuffet(excelDB.excel);
       return sheets;
+    } catch (e) {
+      throw new Error('Failed to import or process data', e);
+    }
+  }
+
+  async onProcessExcel(eventId: string, sheetName: string) {
+    try {
+      const excelDB = await this.eventExcelRepository.findOne({
+        where: { event: { uuid: eventId } },
+      });
+
+      if (!excelDB)
+        throw new InternalServerErrorException('Recurso no encontrado');
+
+      const excelData = getDataFromExcelBuffer<string[]>(
+        excelDB.excel,
+        sheetName,
+      );
+      //eliminamos cabeceras del excel para acceder a los datos principales
+      excelData.shift();
+      excelData.shift();
+
+      console.log('Excel Data -> ', excelData);
+
+      const queryRunner: QueryRunner = this.dbSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      await this.generateTemporyTableFromExcelData(queryRunner, excelData);
+      await this.generateMembersFromExcelData(queryRunner);
+      const linkedMembers = await this.linkMembersToThisEvent(
+        queryRunner,
+        excelDB,
+      );
+
+      console.log('Datos agrregadors -> ', linkedMembers);
+      console.log('Metodo terminado -> onProcessExcel');
+      await queryRunner.release();
+      return true;
     } catch (e) {
       throw new Error('Failed to import or process data', e);
     }
@@ -206,5 +253,107 @@ export class EventExcelService {
       console.log(e);
       throw new Error('Failed to import or process data', e);
     }
+  }
+
+  private async generateTemporyTableFromExcelData(
+    queryRunner: QueryRunner,
+    data: string[][],
+  ) {
+    try {
+      // Create the temporary table with raw SQL
+      await queryRunner.query(`
+        CREATE TEMPORARY TABLE temp_data (
+            PGRFC VARCHAR(255),
+            NombreCompleto VARCHAR(255),
+            PGDEP1 VARCHAR(255),
+            NOMINA VARCHAR(255),
+            Secretaria VARCHAR(255),
+            CuotaSindical VARCHAR(255)
+        );
+      `);
+
+      const insertTemporyValues = data
+        .map(
+          (record: string[]) =>
+            `('${record[0]}', '${record[1]}', '${record[2]}', '${record[3]}', '${record[4]}', '${record[5]}')`,
+        )
+        .join(', ');
+
+      await queryRunner.query(`
+        INSERT INTO temp_data (PGRFC, NombreCompleto, PGDEP1, NOMINA, Secretaria, CuotaSindical)
+        VALUES ${insertTemporyValues};
+      `);
+      const result = await queryRunner.query(`SELECT COUNT(*) FROM temp_data;`);
+      console.log('Total de registros en la tabla temporal', result);
+
+      return result as number;
+    } catch (e) {
+      console.log('generayeTemporyTableFromExcelData -> ', e);
+      throw new InternalServerErrorException(
+        'NO se migraron los datos a la tabla temporal',
+      );
+    }
+  }
+
+  private async generateMembersFromExcelData(
+    queryRunner: QueryRunner,
+  ): Promise<Member[]> {
+    const excelMemberNotINMemebers: TemporyResult[] = (await queryRunner.query(
+      'SELECT * FROM temp_data WHERE NOT EXISTS (SELECT 1 FROM member WHERE member.rfc = temp_data.PGRFC)',
+    )) as TemporyResult[];
+    console.log(
+      `Total de datos a agregar -> ${excelMemberNotINMemebers.length}`,
+    );
+
+    const membersToInsert: Member[] = excelMemberNotINMemebers.map(
+      (memberInsert) => {
+        const birthDate = getDateFromRFC(memberInsert.PGRFC);
+        const member = Object.assign(new Member(), {
+          full_name: memberInsert.NombreCompleto,
+          rfc: memberInsert.PGRFC,
+          birth_date: birthDate ?? new Date(),
+          department: memberInsert.PGDEP1,
+          nom: memberInsert.NOMINA,
+          secretary: memberInsert.Secretaria,
+          contribution:
+            (memberInsert.CuotaSindical as CuotaSindical) ===
+            CuotaSindical.APORTA,
+          status: true,
+          is_real_member: true,
+        });
+
+        return member;
+      },
+    );
+
+    await queryRunner.commitTransaction();
+    const membersInserted =
+      await this.memberService.onBulkInsert(membersToInsert);
+
+    return membersInserted;
+  }
+
+  private async linkMembersToThisEvent(
+    queryRunner: QueryRunner,
+    eventExcel: EventExcel,
+  ) {
+    const excelMember: Member[] = (await queryRunner.query(
+      'SELECT * FROM member WHERE EXISTS (SELECT 1 FROM temp_data WHERE member.rfc = temp_data.PGRFC )',
+    )) as Member[];
+    const excelMemberToInsert = excelMember.map((item) => {
+      const valuetToInsert = Object.assign(new EventExcelHistory(), {
+        eventExcel: eventExcel,
+        member: item,
+      });
+      return valuetToInsert;
+    });
+    console.log(
+      `Datos a insertar en el historial -> ${excelMemberToInsert.length}`,
+    );
+
+    const excelMemberInsert =
+      await this.eventExcelHistoryService.onBuilkInsert(excelMemberToInsert);
+
+    return excelMemberInsert;
   }
 }
