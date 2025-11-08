@@ -9,6 +9,7 @@ import {
   Controller,
   Get,
   InternalServerErrorException,
+  Param,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -21,6 +22,7 @@ import {
   ApiBody,
   ApiConsumes,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -108,5 +110,20 @@ export class EventController {
   @Post('execute')
   executeEvent(@Body() data: ExecuteEventExcel) {
     return this.eventExcelService.processExcel(data.eventId);
+  }
+
+  @ApiOperation({ summary: 'Metodo para obtener un evento' })
+  @ApiBearerAuth('JWT')
+  @ApiParam({
+    name: 'uuid',
+    description: 'Benfit ID',
+    type: String,
+    format: 'uuid',
+  })
+  @ApiResponse({})
+  @Get('get/:uuid')
+  @UsePipes(new ValidationPipe())
+  get(@Param('uuid') uuid: string) {
+    return this.eventService.onGet(uuid);
   }
 }
