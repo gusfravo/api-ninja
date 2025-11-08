@@ -7,6 +7,7 @@ import { EventService } from '@event/services/event.service';
 import {
   Body,
   Controller,
+  Get,
   InternalServerErrorException,
   Post,
   UploadedFile,
@@ -31,7 +32,16 @@ export class EventController {
   constructor(
     private readonly eventService: EventService,
     private readonly eventExcelService: EventExcelService,
-  ) { }
+  ) {}
+
+  @ApiOperation({ summary: 'Metodo para obtener el listado de percepciones' })
+  @ApiBearerAuth('JWT')
+  @ApiResponse({})
+  @Get('list')
+  @UsePipes(new ValidationPipe())
+  list() {
+    return this.eventService.onList();
+  }
 
   @ApiOperation({ summary: 'Metodo para crear un nuevo evento de tomar datos' })
   @ApiBearerAuth('JWT')

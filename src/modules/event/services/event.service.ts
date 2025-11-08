@@ -12,7 +12,7 @@ export class EventService {
   constructor(
     @InjectRepository(Event) private eventRepository: Repository<Event>,
     private benefitService: BenefitService,
-  ) { }
+  ) {}
 
   onUpdate(updateEvent: UpdateEvent) {
     const { uuid, ...createEvent } = updateEvent;
@@ -81,5 +81,9 @@ export class EventService {
         return of(event);
       }),
     );
+  }
+
+  onList(): Observable<Event[]> {
+    return from(this.eventRepository.find({ relations: { benefit: true } }));
   }
 }
