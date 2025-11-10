@@ -1,5 +1,6 @@
 import { ExecuteEventExcel } from '@event/dto/execute-event-excel.dto';
 import { ProccessEventExcel } from '@event/dto/proccess-event-excel.dto';
+import { EventExcel } from '@event/entity/event-excel.entity';
 import { EventExcelService } from '@event/services';
 import {
   Body,
@@ -35,5 +36,18 @@ export class EventExcelController {
   @Post('execute')
   executeEvent(@Body() data: ProccessEventExcel) {
     return this.eventExcelService.onProcessExcel(data.eventId, data.sheetName);
+  }
+
+  @ApiOperation({
+    summary: 'Metodo para saber si este metodo tien excel cargado',
+  })
+  @ApiBearerAuth('JWT')
+  @ApiBody({
+    type: EventExcel,
+  })
+  @UsePipes(new ValidationPipe())
+  @Post('findByEvent')
+  findByEvent(@Body() data: ExecuteEventExcel) {
+    return this.eventExcelService.findByEvent(data.eventId);
   }
 }

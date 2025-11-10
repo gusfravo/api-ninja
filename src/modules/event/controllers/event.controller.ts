@@ -2,7 +2,7 @@ import { ExecuteEventExcel } from '@event/dto/execute-event-excel.dto';
 import { ResponseUploadEventFile } from '@event/dto/ResponseUploadFileEvent.dto';
 import { UpdateEvent } from '@event/dto/update-event.dto';
 import { UploadFileEventDto } from '@event/dto/upload-file-event.dto';
-import { EventExcelService } from '@event/services';
+import { EventExcelService, EventFileService } from '@event/services';
 import { EventService } from '@event/services/event.service';
 import {
   Body,
@@ -34,6 +34,7 @@ export class EventController {
   constructor(
     private readonly eventService: EventService,
     private readonly eventExcelService: EventExcelService,
+    private readonly eventFileSerice: EventFileService,
   ) {}
 
   @ApiOperation({ summary: 'Metodo para obtener el listado de percepciones' })
@@ -125,5 +126,22 @@ export class EventController {
   @UsePipes(new ValidationPipe())
   get(@Param('uuid') uuid: string) {
     return this.eventService.onGet(uuid);
+  }
+
+  @ApiOperation({
+    summary: 'Metodo para obtener el listado entregas por delegación',
+  })
+  @ApiBearerAuth('JWT')
+  @ApiParam({
+    name: 'uuid',
+    description: 'event ID',
+    type: String,
+    format: 'uuid',
+  })
+  @ApiResponse({})
+  @Get('files/:uuid')
+  @UsePipes(new ValidationPipe())
+  findFiles(@Param('uuid') uuid: string) {
+    return this.eventFileSerice.findByEvent(uuid);
   }
 }
