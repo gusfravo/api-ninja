@@ -1,7 +1,9 @@
+import { UpdateEventFile } from '@event/dto';
 import { ExecuteEventExcel } from '@event/dto/execute-event-excel.dto';
 import { ResponseUploadEventFile } from '@event/dto/ResponseUploadFileEvent.dto';
 import { UpdateEvent } from '@event/dto/update-event.dto';
 import { UploadFileEventDto } from '@event/dto/upload-file-event.dto';
+import { EventFile } from '@event/entity/event-file.entity';
 import { EventExcelService, EventFileService } from '@event/services';
 import { EventService } from '@event/services/event.service';
 import {
@@ -143,5 +145,21 @@ export class EventController {
   @UsePipes(new ValidationPipe())
   findFiles(@Param('uuid') uuid: string) {
     return this.eventFileSerice.findByEvent(uuid);
+  }
+
+  @ApiOperation({
+    summary: 'Metodo para crear un nuevo evento file de tomar datos',
+  })
+  @ApiBearerAuth('JWT')
+  @ApiBody({
+    type: UpdateEventFile,
+  })
+  @ApiResponse({
+    type: EventFile,
+  })
+  @Post('eventFiles/update')
+  @UsePipes(new ValidationPipe())
+  updateFileEvent(@Body() object: UpdateEventFile) {
+    return this.eventFileSerice.onUpdate(object);
   }
 }
