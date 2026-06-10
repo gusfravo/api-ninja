@@ -1,7 +1,7 @@
 import { CreateEventMember, UpdateEventMember } from '@event/dto';
 import { EventFile } from '@event/entity/event-file.entity';
 import { EventMember } from '@event/entity/event-members.entity';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { forkJoin, from, of, switchMap, throwError } from 'rxjs';
@@ -75,11 +75,31 @@ export class EventMemberService {
   }
 
   private create(dto: CreateEventMember) {
-    return forkJoin({
-      eventFile: this.getEventFile(dto.eventFileId),
-      member: this.memberService.onGet(dto.memberId),
-      dependence: this.dependenceService.onGet(dto.dependenceId),
-    }).pipe(
+    const duplicate$ = from(
+      this.eventMemberRepository.findOne({
+        where: {
+          member: { uuid: dto.memberId },
+          eventFile: { uuid: dto.eventFileId },
+        },
+      }),
+    ).pipe(
+      switchMap((existing) => {
+        if (existing)
+          return throwError(
+            () => new ConflictException('El miembro ya está registrado en este archivo de evento'),
+          );
+        return of(null);
+      }),
+    );
+
+    return duplicate$.pipe(
+      switchMap(() =>
+        forkJoin({
+          eventFile: this.getEventFile(dto.eventFileId),
+          member: this.memberService.onGet(dto.memberId),
+          dependence: this.dependenceService.onGet(dto.dependenceId),
+        }),
+      ),
       switchMap(({ eventFile, member, dependence }) => {
         const entity = Object.assign(new EventMember(), {
           full_name: dto.full_name,
