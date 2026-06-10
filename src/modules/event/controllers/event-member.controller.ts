@@ -77,6 +77,25 @@ export class EventMemberController {
     return this.eventMemberAdditionalService.findByEventMember(uuid);
   }
 
+  @ApiOperation({ summary: 'Exportar todos los agremiados de un evento a Excel' })
+  @ApiBearerAuth('JWT')
+  @ApiParam({ name: 'eventId', type: String, format: 'uuid' })
+  @Get('export-event/:eventId')
+  async exportByEvent(
+    @Param('eventId') eventId: string,
+    @Res() res: Response,
+  ) {
+    const { buffer } = await lastValueFrom(
+      this.eventMemberExcelService.generateByEvent(eventId),
+    );
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': 'attachment; filename="agremiados-general.xlsx"',
+      'Content-Length': buffer.length,
+    });
+    res.end(buffer);
+  }
+
   @ApiOperation({ summary: 'Exportar agremiados de un EventFile a Excel' })
   @ApiBearerAuth('JWT')
   @ApiParam({ name: 'eventFileId', type: String, format: 'uuid' })

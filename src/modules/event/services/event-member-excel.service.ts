@@ -15,6 +15,84 @@ export class EventMemberExcelService {
     private readonly eventExcelRepository: Repository<EventExcel>,
   ) {}
 
+  generateByEvent(eventId: string) {
+    return from(
+      this.eventFileRepository.find({
+        where: { event: { uuid: eventId } },
+        relations: {
+          event: true,
+          deletation: true,
+          eventMembers: {
+            member: true,
+            additionalStates: true,
+          },
+        },
+      }),
+    ).pipe(
+      switchMap((eventFiles) => {
+        if (!eventFiles.length) throw new NotFoundException('No se encontraron archivos para el evento');
+        return from(
+          this.eventExcelRepository.findOne({ where: { event: { uuid: eventId } } }),
+        ).pipe(map((eventExcel) => ({ eventFiles, eventExcel })));
+      }),
+      map(({ eventFiles, eventExcel }) => {
+        const allMembers = eventFiles.flatMap((f) => f.eventMembers);
+
+        const additionalKeySet = new Set<string>();
+        allMembers.forEach((m) =>
+          m.additionalStates.forEach((s) => additionalKeySet.add(s.key)),
+        );
+        const extraKeys = Array.from(additionalKeySet);
+
+        const headers = [
+          'PGRFC',
+          'NOMBRE',
+          'PGDEP1',
+          'NOMINA',
+          'SECRETARIA',
+          'CUOTA SINDICAL',
+          'APROBADO',
+          ...extraKeys,
+        ];
+
+        const rows = allMembers.map((em) => {
+          const row: Record<string, string> = {
+            PGRFC: em.member?.rfc ?? '',
+            NOMBRE: em.member?.full_name ?? '',
+            PGDEP1: em.member?.department ?? '',
+            NOMINA: em.member?.nom ?? '',
+            SECRETARIA: em.member?.secretary ?? '',
+            'CUOTA SINDICAL': em.member?.contribution ? 'APORTA' : 'NO APORTA',
+            APROBADO: em.approved ? 'SI' : 'NO',
+          };
+          extraKeys.forEach((key) => {
+            const state = em.additionalStates.find((s) => s.key === key);
+            row[key] = state?.value ? 'SI' : 'NO';
+          });
+          return row;
+        });
+
+        const workbook = eventExcel?.excel
+          ? xlsx.read(eventExcel.excel, { type: 'buffer' })
+          : xlsx.utils.book_new();
+
+        const sheetName = 'Agremiados General';
+        const existingIdx = workbook.SheetNames.indexOf(sheetName);
+        if (existingIdx !== -1) {
+          workbook.SheetNames.splice(existingIdx, 1);
+          delete workbook.Sheets[sheetName];
+        }
+
+        const worksheet = xlsx.utils.json_to_sheet(rows, { header: headers });
+        xlsx.utils.book_append_sheet(workbook, worksheet, sheetName);
+
+        return {
+          buffer: xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer,
+        };
+      }),
+    );
+  }
+
   generateByEventFile(eventFileId: string) {
     return from(
       this.eventFileRepository.findOne({
