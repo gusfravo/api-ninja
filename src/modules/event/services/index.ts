@@ -2,3 +2,4 @@ export * from './event.service';
 export * from './event-excel.service';
 export * from './event-excel-history.service';
 export * from './event-file.service';
+export * from './event-member.service';

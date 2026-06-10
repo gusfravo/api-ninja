@@ -30,6 +30,10 @@ export class DependenceService {
     return this.get(dependenceId).pipe(instanceDependence());
   }
 
+  onGetBruto(dependenceId: string) {
+    return this.get(dependenceId);
+  }
+
   onDelete(dependenceId: string) {
     return this.get(dependenceId).pipe(
       switchMap((updateDependence) => {
