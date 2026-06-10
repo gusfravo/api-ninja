@@ -16,6 +16,7 @@ import {
 import { MemberModule } from '@member/member.module';
 import { EventExcelHistory } from './entity/event-excel-history.entity';
 import { EventExcelController } from './controllers/event-excel.controller';
+import { DelegationModule } from '@delegation/delegation.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { EventExcelController } from './controllers/event-excel.controller';
     ]),
     BenefitModule,
     MemberModule,
+    DelegationModule,
   ],
   controllers: [EventController, EventExcelController],
   providers: [
@@ -38,4 +40,4 @@ import { EventExcelController } from './controllers/event-excel.controller';
     EventFileService,
   ],
 })
-export class EventModule {}
+export class EventModule { }

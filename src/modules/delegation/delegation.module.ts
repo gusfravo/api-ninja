@@ -14,5 +14,6 @@ import { DelegationController } from './controller/delgation.controller';
   ],
   providers: [DelegationService],
   controllers: [DelegationController],
+  exports: [DelegationService],
 })
 export class DelegationModule { }
