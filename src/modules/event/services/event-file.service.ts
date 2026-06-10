@@ -19,6 +19,7 @@ export class EventFileService {
   findByEvent(eventId: string) {
     return this.eventFileRepository.find({
       where: { event: { uuid: eventId } },
+      relations: { event: true, deletation: true },
     });
   }
 
@@ -39,8 +40,7 @@ export class EventFileService {
     return forkJoin({ delegation: delegation$, event: event$ }).pipe(
       switchMap(({ delegation, event }) => {
         const saveEventFile = Object.assign(new EventFile(), {
-          ...creatEventFile,
-          delegation: delegation,
+          deletation: delegation,
           event: event,
         });
 
