@@ -78,7 +78,7 @@ export class EventMemberExcelService {
           ? xlsx.read(eventExcel.excel, { type: 'buffer' })
           : xlsx.utils.book_new();
 
-        const sheetName = 'Agremiados';
+        const sheetName = (eventFile.deletation?.name ?? 'Agremiados').slice(0, 31);
         const existingIdx = workbook.SheetNames.indexOf(sheetName);
         if (existingIdx !== -1) {
           workbook.SheetNames.splice(existingIdx, 1);
