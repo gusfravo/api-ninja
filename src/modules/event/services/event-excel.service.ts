@@ -223,7 +223,8 @@ export class EventExcelService {
             department: item.PGDEP1,
             nom: item.NOMINA,
             secretary: item.Secretaria,
-            contribution: item.CuotaSindical,
+            contribution: (item.CuotaSindical as CuotaSindical) ==
+            CuotaSindical.APORTA,
             status: true,
             is_real_member: true,
           });
@@ -316,7 +317,7 @@ export class EventExcelService {
           nom: memberInsert.NOMINA,
           secretary: memberInsert.Secretaria,
           contribution:
-            (memberInsert.CuotaSindical as CuotaSindical) ===
+            (memberInsert.CuotaSindical as CuotaSindical) ==
             CuotaSindical.APORTA,
           status: true,
           is_real_member: true,
