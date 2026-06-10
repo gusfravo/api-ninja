@@ -1,5 +1,6 @@
 import { UpdateEventMember } from '@event/dto/update-event-member.dto';
 import { EventMemberAdditionalService } from '@event/services/event-member-additional.service';
+import { EventMemberExcelService } from '@event/services/event-member-excel.service';
 import { EventMemberService } from '@event/services/event-member.service';
 import {
   Body,
@@ -8,6 +9,7 @@ import {
   Get,
   Param,
   Post,
+  Res,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -18,6 +20,8 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { Response } from 'express';
+import { lastValueFrom } from 'rxjs';
 
 @ApiTags('Event Members')
 @Controller('event-member')
@@ -25,6 +29,7 @@ export class EventMemberController {
   constructor(
     private readonly eventMemberService: EventMemberService,
     private readonly eventMemberAdditionalService: EventMemberAdditionalService,
+    private readonly eventMemberExcelService: EventMemberExcelService,
   ) {}
 
   @ApiOperation({ summary: 'Listar miembros por EventFile' })
@@ -70,5 +75,25 @@ export class EventMemberController {
   @UsePipes(new ValidationPipe())
   listAdditional(@Param('uuid') uuid: string) {
     return this.eventMemberAdditionalService.findByEventMember(uuid);
+  }
+
+  @ApiOperation({ summary: 'Exportar agremiados de un EventFile a Excel' })
+  @ApiBearerAuth('JWT')
+  @ApiParam({ name: 'eventFileId', type: String, format: 'uuid' })
+  @Get('export/:eventFileId')
+  async exportByEventFile(
+    @Param('eventFileId') eventFileId: string,
+    @Res() res: Response,
+  ) {
+    const { buffer, delegationName } = await lastValueFrom(
+      this.eventMemberExcelService.generateByEventFile(eventFileId),
+    );
+    const filename = `agremiados-${delegationName}.xlsx`;
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Length': buffer.length,
+    });
+    res.end(buffer);
   }
 }

@@ -17,6 +17,7 @@ import {
 } from './services';
 import { EventMemberService } from './services/event-member.service';
 import { EventMemberAdditionalService } from './services/event-member-additional.service';
+import { EventMemberExcelService } from './services/event-member-excel.service';
 import { MemberModule } from '@member/member.module';
 import { EventExcelHistory } from './entity/event-excel-history.entity';
 import { EventExcelController } from './controllers/event-excel.controller';
@@ -46,6 +47,7 @@ import { DependenceModule } from '@dependence/dependence.module';
     EventFileService,
     EventMemberService,
     EventMemberAdditionalService,
+    EventMemberExcelService,
   ],
 })
 export class EventModule { }
