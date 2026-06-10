@@ -1,4 +1,5 @@
 import { UpdateEventMember } from '@event/dto/update-event-member.dto';
+import { EventMemberAdditionalService } from '@event/services/event-member-additional.service';
 import { EventMemberService } from '@event/services/event-member.service';
 import {
   Body,
@@ -21,7 +22,10 @@ import {
 @ApiTags('Event Members')
 @Controller('event-member')
 export class EventMemberController {
-  constructor(private readonly eventMemberService: EventMemberService) {}
+  constructor(
+    private readonly eventMemberService: EventMemberService,
+    private readonly eventMemberAdditionalService: EventMemberAdditionalService,
+  ) {}
 
   @ApiOperation({ summary: 'Listar miembros por EventFile' })
   @ApiBearerAuth('JWT')
@@ -57,5 +61,14 @@ export class EventMemberController {
   @UsePipes(new ValidationPipe())
   delete(@Param('uuid') uuid: string) {
     return this.eventMemberService.onDelete(uuid);
+  }
+
+  @ApiOperation({ summary: 'Listar estados adicionales por EventMember' })
+  @ApiBearerAuth('JWT')
+  @ApiParam({ name: 'uuid', type: String, format: 'uuid', description: 'ID del EventMember' })
+  @Get('additional/:uuid')
+  @UsePipes(new ValidationPipe())
+  listAdditional(@Param('uuid') uuid: string) {
+    return this.eventMemberAdditionalService.findByEventMember(uuid);
   }
 }

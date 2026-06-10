@@ -8,6 +8,7 @@ import { BenefitModule } from '@benefit/benefit.module';
 import { EventExcel } from './entity/event-excel.entity';
 import { EventController } from './controllers';
 import { EventMemberController } from './controllers/event-member.controller';
+import { EventMemberAdditionalController } from './controllers/event-member-additional.controller';
 import { EventService } from './services/event.service';
 import {
   EventExcelHistoryService,
@@ -15,6 +16,7 @@ import {
   EventFileService,
 } from './services';
 import { EventMemberService } from './services/event-member.service';
+import { EventMemberAdditionalService } from './services/event-member-additional.service';
 import { MemberModule } from '@member/member.module';
 import { EventExcelHistory } from './entity/event-excel-history.entity';
 import { EventExcelController } from './controllers/event-excel.controller';
@@ -36,13 +38,14 @@ import { DependenceModule } from '@dependence/dependence.module';
     DelegationModule,
     DependenceModule
   ],
-  controllers: [EventController, EventExcelController, EventMemberController],
+  controllers: [EventController, EventExcelController, EventMemberController, EventMemberAdditionalController],
   providers: [
     EventService,
     EventExcelService,
     EventExcelHistoryService,
     EventFileService,
-    EventMemberService
+    EventMemberService,
+    EventMemberAdditionalService,
   ],
 })
 export class EventModule { }

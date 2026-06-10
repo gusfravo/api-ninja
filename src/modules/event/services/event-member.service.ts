@@ -23,7 +23,7 @@ export class EventMemberService {
     return from(
       this.eventMemberRepository.find({
         where: { eventFile: { uuid: eventFileId } },
-        relations: { member: true, dependence: true, eventFile: true },
+        relations: { member: true, dependence: true, eventFile: true, additionalStates: true },
       }),
     );
   }
