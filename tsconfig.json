@@ -41,6 +41,9 @@
       ],
       "@shared/*": [
         "src/shared/*"
+      ],
+      "@role/*": [
+        "src/modules/role/*"
       ]
     }
   }

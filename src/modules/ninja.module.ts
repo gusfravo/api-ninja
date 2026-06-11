@@ -5,6 +5,7 @@ import { BenefitModule } from './benefit/benefit.module';
 import { MemberModule } from './member/member.module';
 import { DelegationModule } from './delegation/delegation.module';
 import { EventModule } from './event/event.module';
+import { RoleModule } from './role/role.module';
 import { CoreModule } from '@core/core.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { CoreModule } from '@core/core.module';
     MemberModule,
     DelegationModule,
     EventModule,
+    RoleModule,
   ],
   providers: [],
   exports: [],
