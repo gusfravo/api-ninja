@@ -1,39 +1,41 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDate, IsString } from 'class-validator';
+import { IsBoolean, IsDateString, IsOptional, IsString } from 'class-validator';
 
 export class CreateMember {
-  @ApiProperty({ description: 'nombre completo del la persona' })
+  @ApiProperty()
   @IsString()
-  fullName: string;
+  full_name: string;
 
-  @ApiProperty({ description: 'RFC de la persona' })
+  @ApiProperty()
   @IsString()
   rfc: string;
 
-  @ApiProperty({ description: 'fecha de nacimiento, se obtiene del RFC' })
-  @IsDate()
-  birthDate: Date;
+  @ApiProperty({ required: false })
+  @IsDateString()
+  @IsOptional()
+  birth_date?: Date;
 
-  @ApiProperty({ description: 'Dep viene en el excel' })
+  @ApiProperty({ required: false })
   @IsString()
-  department: string;
+  @IsOptional()
+  department?: string;
 
-  @ApiProperty({ description: 'Nom viene en el excel' })
+  @ApiProperty({ required: false })
   @IsString()
-  nom: string;
+  @IsOptional()
+  nom?: string;
 
-  @ApiProperty({ description: 'secretary viene en el excel' })
+  @ApiProperty({ required: false })
   @IsString()
-  secretary: string;
+  @IsOptional()
+  secretary?: string;
 
-  @ApiProperty({
-    description:
-      'Indicador para saber si la persona da aportaciones al sindicado',
-  })
+  @ApiProperty()
   @IsBoolean()
   contribution: boolean;
 
-  @ApiProperty({ description: 'status description' })
+  @ApiProperty({ required: false })
   @IsBoolean()
-  status: boolean;
+  @IsOptional()
+  status?: boolean;
 }
