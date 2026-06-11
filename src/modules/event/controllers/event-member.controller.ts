@@ -96,6 +96,26 @@ export class EventMemberController {
     res.end(buffer);
   }
 
+  @ApiOperation({ summary: 'Exportar EventFile en formato UTILES DELEGADOS' })
+  @ApiBearerAuth('JWT')
+  @ApiParam({ name: 'eventFileId', type: String, format: 'uuid' })
+  @Get('export-formatted/:eventFileId')
+  async exportByEventFileFormatted(
+    @Param('eventFileId') eventFileId: string,
+    @Res() res: Response,
+  ) {
+    const { buffer, delegationName } = await lastValueFrom(
+      this.eventMemberExcelService.generateByEventFileFormatted(eventFileId),
+    );
+    const filename = `formato-utiles-${delegationName}.xlsx`;
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}"`,
+      'Content-Length': buffer.length,
+    });
+    res.end(buffer);
+  }
+
   @ApiOperation({ summary: 'Exportar agremiados de un EventFile a Excel' })
   @ApiBearerAuth('JWT')
   @ApiParam({ name: 'eventFileId', type: String, format: 'uuid' })

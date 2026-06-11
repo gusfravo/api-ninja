@@ -2,7 +2,7 @@ import { EventExcel } from '@event/entity/event-excel.entity';
 import { EventFile } from '@event/entity/event-file.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { from, map, switchMap } from 'rxjs';
+import { from, map, of, switchMap } from 'rxjs';
 import { Repository } from 'typeorm';
 import * as xlsx from 'xlsx';
 
@@ -130,6 +130,143 @@ export class EventMemberExcelService {
 
         return {
           buffer: xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer,
+        };
+      }),
+    );
+  }
+
+  generateByEventFileFormatted(eventFileId: string) {
+    return from(
+      this.eventFileRepository.findOne({
+        where: { uuid: eventFileId },
+        relations: {
+          event: true,
+          deletation: true,
+          eventMembers: {
+            member: true,
+            additionalStates: true,
+            dependence: true,
+          },
+        },
+      }),
+    ).pipe(
+      switchMap((eventFile) => {
+        if (!eventFile) throw new NotFoundException('EventFile no encontrado');
+        return of(eventFile);
+      }),
+      map((eventFile) => {
+        const members = eventFile.eventMembers ?? [];
+        const delegationCode = eventFile.deletation?.code ?? '';
+        const dependenceName = eventFile.dependence_name ?? '';
+
+        const ws: xlsx.WorkSheet = {};
+        const set = (c: number, r: number, v: string | number) => {
+          ws[xlsx.utils.encode_cell({ c, r })] = { v, t: typeof v === 'number' ? 'n' : 's' };
+        };
+        const getState = (em: any, key: string): string =>
+          ((em.additionalStates ?? []) as any[]).some((s: any) => s.key === key && s.value)
+            ? 'X'
+            : '';
+
+        // r=1 (row 2): Title
+        set(0, 1, 'SECRETARIA DE  ACTAS Y ACUERDOS');
+        // r=2 (row 3): Subtitle
+        set(0, 2, 'DOCUMENTACION DE  ÚTILES ESCOLARES 2025');
+        // r=3 (row 4): DEPENDENCIA / CLAVE DELEGACIONAL
+        set(0, 3, `DEPENDENCIA: ${dependenceName}`);
+        set(13, 3, `CLAVE DELEGACIONAL: ${delegationCode}`);
+
+        // r=5 (row 6): Column group headers
+        set(0, 5, 'Nº');
+        set(1, 5, 'NOMBRE DEL TRABAJADOR (Empezando por el apellido en orden alfabético)');
+        set(2, 5, 'NOMBRE DEL HIJO (A) (Empezando por el apellido en orden alfabético)');
+        set(3, 5, 'TRABAJADOR ESTUDIANTE (X)');
+        set(4, 5, 'DEPENDENCIA');
+        set(5, 5, 'NIVEL ESCOLAR');
+        set(6, 5, 'DOCUMENTACIÓN EN ORIGINAL');
+        set(9, 5, 'DOCUMENTACIÓN EN COPIA');
+        set(14, 5, 'CARTA COMPROMISO');
+        set(16, 5, 'EXENTO');
+        set(17, 5, 'OBSERVACIONES');
+        set(18, 5, 'APROBADO');
+
+        // r=7 (row 8): Individual column headers
+        set(6, 7, 'BOLETA ');
+        set(7, 7, 'CONSTANCIA');
+        set(8, 7, 'RECIBO DE INSCRIPCIÓN');
+        set(9, 7, 'SOBRE DE PAGO');
+        set(10, 7, 'ACTA NACIMIENTO');
+        set(11, 7, 'BOLETA ');
+        set(12, 7, 'CONSTANCIA');
+        set(13, 7, 'RECIBO DE INSCRIPCIÓN');
+        set(14, 7, 'CONSTANCIA O BOLETA');
+        set(15, 7, 'RECIBO DE INSCRIPCIÓN');
+        set(16, 7, 'EXENTO DE INSCRIPCIÓN');
+
+        // Data rows starting at r=8 (row 9)
+        members.forEach((em, idx) => {
+          const r = 8 + idx;
+          set(0, r, idx + 1);
+          set(1, r, em.member?.full_name ?? '');
+          set(2, r, em.child_name ?? '');
+          set(3, r, getState(em, 'Trabajador Estudiante'));
+          set(4, r, em.dependence?.name ?? '');
+          set(5, r, em.school_level ?? '');
+          set(6, r, getState(em, 'Boleta Original'));
+          set(7, r, getState(em, 'Constancia Original'));
+          set(8, r, getState(em, 'Recibo Inscripción Original'));
+          set(9, r, getState(em, 'Sobre de Pago'));
+          set(10, r, getState(em, 'Acta Nacimiento'));
+          set(11, r, getState(em, 'Boleta Copia'));
+          set(12, r, getState(em, 'Constancia Copia'));
+          set(13, r, getState(em, 'Recibo Inscripción Copia'));
+          set(14, r, getState(em, 'Constancia o Boleta'));
+          set(15, r, getState(em, 'Recibo Inscripción Carta'));
+          set(16, r, getState(em, 'Exento de Inscripción'));
+          set(17, r, em.observations ?? '');
+          set(18, r, em.approved ? 'SI' : 'NO');
+        });
+
+        // Signature rows (at least 17 data rows as in template, then 2 blank, then sigs)
+        const sigR1 = 8 + Math.max(members.length, 17) + 2;
+        const sigR2 = sigR1 + 1;
+        set(1, sigR1, '________________________________________');
+        set(11, sigR1, '__________________________________');
+        set(1, sigR2, '           DELEGADO SINDICAL');
+        set(11, sigR2, 'DELEGADO SINDICAL');
+
+        ws['!ref'] = xlsx.utils.encode_range({ s: { c: 0, r: 1 }, e: { c: 18, r: sigR2 } });
+
+        ws['!merges'] = [
+          { s: { c: 0, r: 1 }, e: { c: 18, r: 1 } },   // A2:S2  Title
+          { s: { c: 0, r: 2 }, e: { c: 18, r: 2 } },   // A3:S3  Subtitle
+          { s: { c: 0, r: 3 }, e: { c: 12, r: 3 } },   // A4:M4  DEPENDENCIA
+          { s: { c: 13, r: 3 }, e: { c: 18, r: 3 } },  // N4:S4  CLAVE DELEGACIONAL
+          { s: { c: 0, r: 5 }, e: { c: 0, r: 7 } },    // A6:A8  Nº
+          { s: { c: 1, r: 5 }, e: { c: 1, r: 7 } },    // B6:B8  NOMBRE TRABAJADOR
+          { s: { c: 2, r: 5 }, e: { c: 2, r: 7 } },    // C6:C8  NOMBRE HIJO
+          { s: { c: 3, r: 5 }, e: { c: 3, r: 7 } },    // D6:D8  TRABAJADOR ESTUDIANTE
+          { s: { c: 4, r: 5 }, e: { c: 4, r: 7 } },    // E6:E8  DEPENDENCIA
+          { s: { c: 5, r: 5 }, e: { c: 5, r: 7 } },    // F6:F8  NIVEL ESCOLAR
+          { s: { c: 6, r: 5 }, e: { c: 8, r: 6 } },    // G6:I7  DOCUMENTACIÓN EN ORIGINAL
+          { s: { c: 9, r: 5 }, e: { c: 13, r: 6 } },   // J6:N7  DOCUMENTACIÓN EN COPIA
+          { s: { c: 14, r: 5 }, e: { c: 15, r: 6 } },  // O6:P7  CARTA COMPROMISO
+          { s: { c: 16, r: 5 }, e: { c: 16, r: 6 } },  // Q6:Q7  EXENTO
+          { s: { c: 17, r: 5 }, e: { c: 17, r: 7 } },  // R6:R8  OBSERVACIONES
+          { s: { c: 18, r: 5 }, e: { c: 18, r: 7 } },  // S6:S8  APROBADO
+          { s: { c: 1, r: sigR1 }, e: { c: 2, r: sigR1 } },
+          { s: { c: 11, r: sigR1 }, e: { c: 16, r: sigR1 } },
+          { s: { c: 1, r: sigR2 }, e: { c: 2, r: sigR2 } },
+          { s: { c: 11, r: sigR2 }, e: { c: 16, r: sigR2 } },
+        ];
+
+        const wb = xlsx.utils.book_new();
+        const sheetName = (eventFile.deletation?.name ?? 'Formato').slice(0, 31);
+        xlsx.utils.book_append_sheet(wb, ws, sheetName);
+
+        return {
+          buffer: xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer,
+          delegationName: eventFile.deletation?.name ?? 'formato',
         };
       }),
     );
