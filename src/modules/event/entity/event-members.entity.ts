@@ -22,6 +22,12 @@ export class EventMember {
   @Column()
   full_name: string;
 
+  @Column({ nullable: true })
+  child_name: string;
+
+  @Column({ nullable: true })
+  school_level: string;
+
   @Column()
   observations: string;
 

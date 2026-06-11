@@ -37,6 +37,9 @@ export class EventFile {
   })
   deletation: Delegation;
 
+  @Column({ type: 'text', nullable: true })
+  dependence_name: string | null;
+
   @OneToMany(() => EventMember, (eventMember) => eventMember.eventFile)
   eventMembers: EventMember[];
 }

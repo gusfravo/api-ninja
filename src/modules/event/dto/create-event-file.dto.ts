@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsUUID } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateEventFile {
   @ApiProperty({
@@ -12,5 +12,10 @@ export class CreateEventFile {
   @ApiProperty({ description: 'Delegacion identificador' })
   @IsUUID()
   delegationId: string;
+
+  @ApiPropertyOptional({ description: 'Nombre de la dependencia', nullable: true })
+  @IsString()
+  @IsOptional()
+  dependence_name?: string | null;
 }
 

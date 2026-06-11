@@ -42,6 +42,7 @@ export class EventFileService {
         const saveEventFile = Object.assign(new EventFile(), {
           deletation: delegation,
           event: event,
+          dependence_name: creatEventFile.dependence_name ?? null,
         });
 
         return from(this.eventFileRepository.save(saveEventFile));
@@ -64,6 +65,7 @@ export class EventFileService {
           switchMap(({ delegation, event }) => {
             eventFile.deletation = delegation;
             eventFile.event = event;
+            eventFile.dependence_name = updateEventFile.dependence_name ?? null;
             return from(this.eventFileRepository.save(eventFile));
           }),
         );

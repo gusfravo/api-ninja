@@ -18,6 +18,16 @@ export class CreateEventMember {
   @IsString()
   full_name: string;
 
+  @ApiPropertyOptional({ description: 'Nombre del hijo', nullable: true })
+  @IsString()
+  @IsOptional()
+  child_name: string;
+
+  @ApiPropertyOptional({ description: 'Nivel escolar', nullable: true })
+  @IsString()
+  @IsOptional()
+  school_level: string;
+
   @ApiPropertyOptional({ description: 'Observaciones' })
   @IsString()
   @IsOptional()

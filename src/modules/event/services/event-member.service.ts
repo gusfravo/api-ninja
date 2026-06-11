@@ -103,6 +103,8 @@ export class EventMemberService {
       switchMap(({ eventFile, member, dependence }) => {
         const entity = Object.assign(new EventMember(), {
           full_name: dto.full_name,
+          child_name: dto.child_name ?? null,
+          school_level: dto.school_level ?? null,
           observations: dto.observations ?? '',
           approved: dto.approved ?? false,
           status: dto.status,
@@ -124,6 +126,8 @@ export class EventMemberService {
         }).pipe(
           switchMap(({ member, dependence }) => {
             entity.full_name = dto.full_name;
+            entity.child_name = dto.child_name;
+            entity.school_level = dto.school_level;
             entity.observations = dto.observations ?? entity.observations;
             entity.approved = dto.approved ?? entity.approved;
             entity.status = dto.status;
