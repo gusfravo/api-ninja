@@ -18,7 +18,11 @@ export class Event {
   @PrimaryGeneratedColumn('uuid')
   uuid: string;
 
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: EventStatus,
+    default: EventStatus.INIT,
+  })
   status: EventStatus;
 
   @Column({
