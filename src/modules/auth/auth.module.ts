@@ -6,6 +6,8 @@ import { RoleService } from './services/roles/role.service';
 import { UserService } from './services/user/user.service';
 import { AuthService } from './services/auth/auth.service';
 import { AuthController } from './controllers/auth.controller';
+import { RoleController } from './controllers/role.controller';
+import { UserController } from './controllers/user.controller';
 import { LocalStrategy } from './strategies/local.strategy';
 import { CoreModule } from '@core/core.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -14,7 +16,7 @@ import { JwtGuard } from './guards/Jwt.guard';
 
 @Module({
   imports: [CoreModule, TypeOrmModule.forFeature([Role, User])],
-  controllers: [AuthController],
+  controllers: [AuthController, RoleController, UserController],
   providers: [
     RoleService,
     UserService,
@@ -23,8 +25,8 @@ import { JwtGuard } from './guards/Jwt.guard';
     JwtStrategy,
     {
       provide: APP_GUARD,
-      useClass: JwtGuard
-    }
+      useClass: JwtGuard,
+    },
   ],
 })
-export class AuthModule { }
+export class AuthModule {}

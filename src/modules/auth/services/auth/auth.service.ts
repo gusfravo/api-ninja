@@ -69,6 +69,7 @@ export class AuthService {
   }
 
   onValidate({ username, password }: LoginUserDto): Observable<User> {
+    console.log(username,password);
     return this.userService.onFindByUsername(username).pipe(
       switchMap((user) => {
         if (!user)
@@ -97,6 +98,8 @@ export class AuthService {
         name: user.role.name,
       },
     };
+
+    console.log(payload);
 
     return from(this.jwtService.signAsync(payload)).pipe(
       switchMap((token) => {

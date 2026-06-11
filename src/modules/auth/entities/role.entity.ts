@@ -16,6 +16,9 @@ export class Role {
   @Column()
   name: string;
 
+  @Column({ nullable: true, default: '' })
+  description: string;
+
   @Column()
   status: boolean;
 

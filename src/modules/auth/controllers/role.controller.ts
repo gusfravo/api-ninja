@@ -1,6 +1,6 @@
-import { UpdateRole } from '@role/dto/update-role.dto';
-import { Role } from '@role/entity/role.entity';
-import { RoleService } from '@role/service/role.service';
+import { UpdateRoleDto } from '@auth/dtos/update-role.dto';
+import { Role } from '@auth/entities/role.entity';
+import { RoleService } from '@auth/services/roles/role.service';
 import {
   Body,
   Controller,
@@ -45,11 +45,11 @@ export class RoleController {
 
   @ApiOperation({ summary: 'Crear o actualizar un rol' })
   @ApiBearerAuth('JWT')
-  @ApiBody({ type: UpdateRole })
+  @ApiBody({ type: UpdateRoleDto })
   @ApiResponse({ type: Role })
   @Post('update')
   @UsePipes(new ValidationPipe())
-  update(@Body() dto: UpdateRole) {
+  update(@Body() dto: UpdateRoleDto) {
     return this.roleService.onUpdate(dto);
   }
 
