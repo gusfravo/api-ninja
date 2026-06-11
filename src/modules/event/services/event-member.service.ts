@@ -126,8 +126,8 @@ export class EventMemberService {
         }).pipe(
           switchMap(({ member, dependence }) => {
             entity.full_name = dto.full_name;
-            entity.child_name = dto.child_name;
-            entity.school_level = dto.school_level;
+            entity.child_name = dto.child_name !== undefined ? dto.child_name : entity.child_name;
+            entity.school_level = dto.school_level !== undefined ? dto.school_level : entity.school_level;
             entity.observations = dto.observations ?? entity.observations;
             entity.approved = dto.approved ?? entity.approved;
             entity.status = dto.status;
