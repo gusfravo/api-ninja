@@ -38,6 +38,13 @@ export class EventMemberExcelService {
       map(({ eventFiles, eventExcel }) => {
         const allMembers = eventFiles.flatMap((f) => f.eventMembers);
 
+        // Build RFC set for comparison against uploaded Excel
+        const eventMemberRfcSet = new Set(
+          allMembers
+            .map((em) => em.member?.rfc?.trim().toUpperCase())
+            .filter(Boolean) as string[],
+        );
+
         const additionalKeySet = new Set<string>();
         allMembers.forEach((m) =>
           m.additionalStates.forEach((s) => additionalKeySet.add(s.key)),
@@ -76,15 +83,50 @@ export class EventMemberExcelService {
           ? xlsx.read(eventExcel.excel, { type: 'buffer' })
           : xlsx.utils.book_new();
 
+        // Tab 1: Agremiados General
         const sheetName = 'Agremiados General';
         const existingIdx = workbook.SheetNames.indexOf(sheetName);
         if (existingIdx !== -1) {
           workbook.SheetNames.splice(existingIdx, 1);
           delete workbook.Sheets[sheetName];
         }
-
         const worksheet = xlsx.utils.json_to_sheet(rows, { header: headers });
         xlsx.utils.book_append_sheet(workbook, worksheet, sheetName);
+
+        // Tab 2: "sin delegacion" — rows from uploaded Excel whose RFC is not captured as EventMember
+        if (eventExcel?.excel) {
+          const sourceWb = xlsx.read(eventExcel.excel, { type: 'buffer' });
+          const skipSheets = new Set(['Agremiados General', 'sin delegacion']);
+          const seenRfcs = new Set<string>();
+          const sinDelegacionRows: Record<string, string>[] = [];
+
+          sourceWb.SheetNames
+            .filter((s) => !skipSheets.has(s))
+            .forEach((s) => {
+              const sheetRows = xlsx.utils.sheet_to_json<Record<string, string>>(
+                sourceWb.Sheets[s],
+                { defval: '' },
+              );
+              sheetRows.forEach((row) => {
+                const rfc = (row['PGRFC'] ?? row['RFC'] ?? '').toString().trim().toUpperCase();
+                if (rfc && !eventMemberRfcSet.has(rfc) && !seenRfcs.has(rfc)) {
+                  seenRfcs.add(rfc);
+                  sinDelegacionRows.push(row);
+                }
+              });
+            });
+
+          if (sinDelegacionRows.length > 0) {
+            const sinDelName = 'sin delegacion';
+            const sinDelIdx = workbook.SheetNames.indexOf(sinDelName);
+            if (sinDelIdx !== -1) {
+              workbook.SheetNames.splice(sinDelIdx, 1);
+              delete workbook.Sheets[sinDelName];
+            }
+            const sinDelSheet = xlsx.utils.json_to_sheet(sinDelegacionRows);
+            xlsx.utils.book_append_sheet(workbook, sinDelSheet, sinDelName);
+          }
+        }
 
         return {
           buffer: xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer,
