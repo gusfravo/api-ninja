@@ -210,7 +210,7 @@ export class EventMemberExcelService {
           set(1, r, em.member?.full_name ?? '');
           set(2, r, em.child_name ?? '');
           set(3, r, getState(em, 'Trabajador Estudiante'));
-          set(4, r, em.dependence?.name ?? '');
+          set(4, r, em.member.secretary ?? '');
           set(5, r, em.school_level ?? '');
           set(6, r, getState(em, 'Boleta Original'));
           set(7, r, getState(em, 'Constancia Original'));
