@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Event } from './event.entity';
 import { Delegation } from '@delegation/entity/delegation.entity';
+import { Dependence } from '@dependence/entity/dependence.entity';
 import { EventMember } from './event-members.entity';
 
 @Entity()
@@ -39,6 +40,10 @@ export class EventFile {
 
   @Column({ type: 'text', nullable: true })
   dependence_name: string | null;
+
+  @ManyToOne(() => Dependence, { nullable: true, eager: false })
+  @JoinColumn({ name: 'dependence_id', referencedColumnName: 'uuid' })
+  dependence: Dependence | null;
 
   @OneToMany(() => EventMember, (eventMember) => eventMember.eventFile)
   eventMembers: EventMember[];

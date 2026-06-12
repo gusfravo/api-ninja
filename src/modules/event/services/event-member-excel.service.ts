@@ -36,7 +36,9 @@ export class EventMemberExcelService {
         ).pipe(map((eventExcel) => ({ eventFiles, eventExcel })));
       }),
       map(({ eventFiles, eventExcel }) => {
-        const allMembers = eventFiles.flatMap((f) => f.eventMembers);
+        const allMembers = eventFiles
+          .flatMap((f) => f.eventMembers)
+          .sort((a, b) => (a.member?.full_name ?? '').localeCompare(b.member?.full_name ?? '', 'es'));
 
         // Build RFC set for comparison against uploaded Excel
         const eventMemberRfcSet = new Set(
@@ -155,7 +157,9 @@ export class EventMemberExcelService {
         return of(eventFile);
       }),
       map((eventFile) => {
-        const members = eventFile.eventMembers ?? [];
+        const members = (eventFile.eventMembers ?? [])
+          .slice()
+          .sort((a, b) => (a.member?.full_name ?? '').localeCompare(b.member?.full_name ?? '', 'es'));
         const delegationCode = eventFile.deletation?.code ?? '';
         const dependenceName = eventFile.dependence_name ?? '';
 
@@ -210,7 +214,7 @@ export class EventMemberExcelService {
           set(1, r, em.member?.full_name ?? '');
           set(2, r, em.child_name ?? '');
           set(3, r, getState(em, 'Trabajador Estudiante'));
-          set(4, r, em.dependence?.name ?? '');
+          set(4, r, em.member.secretary ?? '');
           set(5, r, em.school_level ?? '');
           set(6, r, getState(em, 'Boleta Original'));
           set(7, r, getState(em, 'Constancia Original'));
@@ -272,6 +276,93 @@ export class EventMemberExcelService {
     );
   }
 
+  generateByEventAndDependence(eventId: string, dependenceId: string) {
+    return from(
+      this.eventFileRepository.find({
+        where: {
+          event: { uuid: eventId },
+          dependence: { uuid: dependenceId },
+        },
+        relations: {
+          event: true,
+          deletation: true,
+          dependence: true,
+          eventMembers: {
+            member: true,
+            additionalStates: true,
+          },
+        },
+      }),
+    ).pipe(
+      switchMap((eventFiles) => {
+        if (!eventFiles.length)
+          throw new NotFoundException('No se encontraron archivos para esta dependencia en el evento');
+        return from(
+          this.eventExcelRepository.findOne({ where: { event: { uuid: eventId } } }),
+        ).pipe(map((eventExcel) => ({ eventFiles, eventExcel })));
+      }),
+      map(({ eventFiles, eventExcel }) => {
+        const dependenceName = eventFiles[0]?.dependence?.name ?? 'Dependencia';
+
+        const allMembers = eventFiles
+          .flatMap((f) => f.eventMembers)
+          .sort((a, b) => (a.member?.full_name ?? '').localeCompare(b.member?.full_name ?? '', 'es'));
+
+        const additionalKeySet = new Set<string>();
+        allMembers.forEach((m) =>
+          m.additionalStates.forEach((s) => additionalKeySet.add(s.key)),
+        );
+        const extraKeys = Array.from(additionalKeySet);
+
+        const headers = [
+          'PGRFC',
+          'NOMBRE',
+          'PGDEP1',
+          'NOMINA',
+          'SECRETARIA',
+          'CUOTA SINDICAL',
+          'APROBADO',
+          ...extraKeys,
+        ];
+
+        const rows = allMembers.map((em) => {
+          const row: Record<string, string> = {
+            PGRFC: em.member?.rfc ?? '',
+            NOMBRE: em.member?.full_name ?? '',
+            PGDEP1: em.member?.department ?? '',
+            NOMINA: em.member?.nom ?? '',
+            SECRETARIA: em.member?.secretary ?? '',
+            'CUOTA SINDICAL': em.member?.contribution ? 'APORTA' : 'NO APORTA',
+            APROBADO: em.approved ? 'SI' : 'NO',
+          };
+          extraKeys.forEach((key) => {
+            const state = em.additionalStates.find((s) => s.key === key);
+            row[key] = state?.value ? 'SI' : 'NO';
+          });
+          return row;
+        });
+
+        const workbook = eventExcel?.excel
+          ? xlsx.read(eventExcel.excel, { type: 'buffer' })
+          : xlsx.utils.book_new();
+
+        const sheetName = dependenceName.slice(0, 31);
+        const existingIdx = workbook.SheetNames.indexOf(sheetName);
+        if (existingIdx !== -1) {
+          workbook.SheetNames.splice(existingIdx, 1);
+          delete workbook.Sheets[sheetName];
+        }
+        const worksheet = xlsx.utils.json_to_sheet(rows, { header: headers });
+        xlsx.utils.book_append_sheet(workbook, worksheet, sheetName);
+
+        return {
+          buffer: xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer,
+          dependenceName,
+        };
+      }),
+    );
+  }
+
   generateByEventFile(eventFileId: string) {
     return from(
       this.eventFileRepository.findOne({
@@ -313,7 +404,10 @@ export class EventMemberExcelService {
           ...extraKeys,
         ];
 
-        const rows = eventFile.eventMembers.map((em) => {
+        const rows = eventFile.eventMembers
+          .slice()
+          .sort((a, b) => (a.member?.full_name ?? '').localeCompare(b.member?.full_name ?? '', 'es'))
+          .map((em) => {
           const row: Record<string, string> = {
             PGRFC: em.member?.rfc ?? '',
             NOMBRE: em.member?.full_name ?? '',

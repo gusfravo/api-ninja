@@ -77,6 +77,28 @@ export class EventMemberController {
     return this.eventMemberAdditionalService.findByEventMember(uuid);
   }
 
+  @ApiOperation({ summary: 'Exportar agremiados de un evento filtrados por dependencia a Excel' })
+  @ApiBearerAuth('JWT')
+  @ApiParam({ name: 'eventId', type: String, format: 'uuid' })
+  @ApiParam({ name: 'dependenceId', type: String, format: 'uuid' })
+  @Get('export-event/:eventId/dependence/:dependenceId')
+  async exportByEventAndDependence(
+    @Param('eventId') eventId: string,
+    @Param('dependenceId') dependenceId: string,
+    @Res() res: Response,
+  ) {
+    const { buffer, dependenceName } = await lastValueFrom(
+      this.eventMemberExcelService.generateByEventAndDependence(eventId, dependenceId),
+    );
+    const filename = `agremiados-${dependenceName}.xlsx`;
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}"`,
+      'Content-Length': buffer.length,
+    });
+    res.end(buffer);
+  }
+
   @ApiOperation({ summary: 'Exportar todos los agremiados de un evento a Excel' })
   @ApiBearerAuth('JWT')
   @ApiParam({ name: 'eventId', type: String, format: 'uuid' })
