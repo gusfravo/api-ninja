@@ -17,5 +17,10 @@ export class CreateEventFile {
   @IsString()
   @IsOptional()
   dependence_name?: string | null;
+
+  @ApiPropertyOptional({ description: 'Dependencia identificador', nullable: true })
+  @IsUUID()
+  @IsOptional()
+  dependenceId?: string | null;
 }
 
