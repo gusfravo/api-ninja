@@ -36,7 +36,9 @@ export class EventMemberExcelService {
         ).pipe(map((eventExcel) => ({ eventFiles, eventExcel })));
       }),
       map(({ eventFiles, eventExcel }) => {
-        const allMembers = eventFiles.flatMap((f) => f.eventMembers);
+        const allMembers = eventFiles
+          .flatMap((f) => f.eventMembers)
+          .sort((a, b) => (a.member?.full_name ?? '').localeCompare(b.member?.full_name ?? '', 'es'));
 
         // Build RFC set for comparison against uploaded Excel
         const eventMemberRfcSet = new Set(
@@ -155,7 +157,9 @@ export class EventMemberExcelService {
         return of(eventFile);
       }),
       map((eventFile) => {
-        const members = eventFile.eventMembers ?? [];
+        const members = (eventFile.eventMembers ?? [])
+          .slice()
+          .sort((a, b) => (a.member?.full_name ?? '').localeCompare(b.member?.full_name ?? '', 'es'));
         const delegationCode = eventFile.deletation?.code ?? '';
         const dependenceName = eventFile.dependence_name ?? '';
 
@@ -313,7 +317,10 @@ export class EventMemberExcelService {
           ...extraKeys,
         ];
 
-        const rows = eventFile.eventMembers.map((em) => {
+        const rows = eventFile.eventMembers
+          .slice()
+          .sort((a, b) => (a.member?.full_name ?? '').localeCompare(b.member?.full_name ?? '', 'es'))
+          .map((em) => {
           const row: Record<string, string> = {
             PGRFC: em.member?.rfc ?? '',
             NOMBRE: em.member?.full_name ?? '',
